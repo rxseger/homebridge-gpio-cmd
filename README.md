@@ -9,7 +9,7 @@ Supports triggering General Purpose Input Output (GPIO) pins on the Raspberry Pi
 ## Installation
 1.	Install Homebridge using `npm install -g homebridge`
 2.	Install this plugin `npm install -g homebridge-gpio`
-3.	Update your conifguration file - see `sample-config.json` in this repo
+3.	Update your configuration file - see `sample-config.json` in this repo
 4.	Install my forked version of [gpo-admin](https://github.com/quick2wire/quick2wire-gpio-admin) _(abandoned project)_:
 
 
