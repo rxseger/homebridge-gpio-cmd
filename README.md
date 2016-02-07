@@ -12,6 +12,7 @@ Supports triggering General Purpose Input Output (GPIO) pins on the Raspberry Pi
 3.	Update your conifguration file - see `sample-config.json` in this repo
 4.	Install my forked version of [gpo-admin](https://github.com/quick2wire/quick2wire-gpio-admin) _(abandoned project)_:
 
+
 ```bash
 git clone git://github.com/jamesblanksby/quick2wire-gpio-admin.git
 cd quick2wire-gpio-admin
@@ -25,13 +26,13 @@ Example `config.json`
 
 ```json
 {
-	"accessories": [
-		{
-			"accessory": "GPIO",
-			"name": "GPIO4",
-			"pin": 7
-		}
-	]
+  "accessories": [
+    {
+      "accessory": "GPIO",
+        "name": "GPIO4",
+        "pin": 7
+    }
+  ]
 }
 ```
 
