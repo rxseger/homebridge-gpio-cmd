@@ -30,7 +30,8 @@ Example `config.json`
     {
       "accessory": "GPIO",
         "name": "GPIO4",
-        "pin": 7
+        "pin": 7,
+        "duration": 4000
     }
   ]
 }
