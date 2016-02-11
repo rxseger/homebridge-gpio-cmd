@@ -12,6 +12,7 @@ function GPIOAccessory(log, config) {
     this.log = log;
     this.name = config['name'];
     this.pin = config['pin'];
+    this.duration = config['duration'];
     this.service = new Service.Switch(this.name);
 
     if (!this.pin) throw new Error('You must provide a config value for pin.');
@@ -36,20 +37,40 @@ GPIOAccessory.prototype.getOn = function(callback) {
 }
 
 GPIOAccessory.prototype.setOn = function(on, callback) {
-    var self = this;
     if (on) {
-        this.log('Turning on pin #' + this.pin);
-        gpio.open(self.pin, 'output', function() {
-        	gpio.write(self.pin, 0, function() {
-                callback(null);
-        	});
-        });
+        this.pinAction(0);
+		if (is_defined(this.duration) && is_int(this.duration)) {
+			this.pinTimer()
+		}
+		callback(null);
     } else {
-		this.log('Turning off pin #' + this.pin);
-        gpio.open(self.pin, 'output', function() {
-            gpio.write(self.pin, 1, function() {
-                callback(null);
-            });
-        });
+		this.pinAction(1);
+		callback(null);
     }
+}
+
+GPIOAccessory.prototype.pinAction = function(action) {
+        this.log('Turning ' + (action == 0 ? 'on' : 'off') + ' pin #' + this.pin);
+
+        var self = this;
+        gpio.open(self.pin, 'output', function() {
+        gpio.write(self.pin, action, function() {
+            return true;
+        });
+    });
+}
+
+GPIOAccessory.prototype.pinTimer = function() {
+        var self = this;
+        setTimeout(function() {
+			self.pinAction(1);
+        }, this.duration);
+}
+
+var is_int = function(n) {
+   return n % 1 === 0;
+}
+
+var is_defined = function(v) {
+	return typeof v !== 'undefined';
 }
