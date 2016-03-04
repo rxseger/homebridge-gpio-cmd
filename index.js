@@ -30,9 +30,12 @@ GPIOAccessory.prototype.getServices = function() {
 
 GPIOAccessory.prototype.getOn = function(callback) {
     gpio.read(this.pin, function(err, value) {
-        if (err) callback(err);
-        var on = value;
-        callback(null, on);
+        if (err) {
+        	callback(err);
+        } else {
+	        var on = value;
+    	    callback(null, on);
+    	}
     });
 }
 
