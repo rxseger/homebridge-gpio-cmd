@@ -58,7 +58,8 @@ GPIOAccessory.prototype.pinAction = function(action) {
         var self = this;
         gpio.open(self.pin, 'output', function() {
         gpio.write(self.pin, action, function() {
-            return true;
+		gpio.close(self.pin);
+		return true;
         });
     });
 }
