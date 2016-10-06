@@ -1,14 +1,15 @@
 {
-	"name": "homebridge-gpio",
+	"name": "homebridge-gpio-cmd",
 	"version": "0.0.4",
-	"description": "Raspberry Pi GPIO plugin for Homebridge: https://github.com/nfarina/homebridge",
+	"description": "Raspberry Pi GPIO plugin for Homebridge, using /usr/bin/gpio",
 	"license": "MIT",
 	"keywords": [
-		"homebridge-plugin"
+		"homebridge-plugin",
+		"gpio"
 	],
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/jamesblanksby/homebridge-gpio.git"
+		"url": "git://github.com/rxseger/homebridge-gpio-cmd.git"
 	},
 	"engines": {
 		"node": ">=0.12.0",

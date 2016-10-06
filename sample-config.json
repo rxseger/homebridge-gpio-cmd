@@ -11,7 +11,7 @@
 	"accessories": [
 		{
 			"accessory": "GPIO",
-			"name": "GPIO4",
+			"name": "Lamp",
 			"pin": 7,
 			"duration": 4000
 		}

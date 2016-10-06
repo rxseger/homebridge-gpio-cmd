@@ -1,25 +1,22 @@
-# Homebridge GPIO
+# homebridge-gpio-cmd
 
 Supports triggering General Purpose Input Output (GPIO) pins on the Raspberry Pi.
 
+homebridge-gpio-cmd is based on:
+
+* [homebridge-gpio](https://www.npmjs.com/package/homebridge-gpio) - uses quick2wire [gpio-admin](https://github.com/quick2wire/quick2wire-gpio-admin)
+* [homebridge-gpio-wpi](https://www.npmjs.com/package/homebridge-gpio-wpi) - uses [wiring-pi](https://github.com/eugeneware/wiring-pi) Node.js bindings
+
+except it runs the `/usr/bin/gpio` executable instead of using any other Node.js dependencies, for easier installation.
+
 ## Requirements
 -	[Homebridge](https://github.com/nfarina/homebridge) - _HomeKit support for the impatient_
--	[gpio-admin](https://github.com/quick2wire/quick2wire-gpio-admin) - _Use the GPIO pins on the Raspberry Pi without running as root_
+-	`/usr/bin/gpio` shell command (from [WiringPi](http://wiringpi.com), already included in e.g. [Raspbian](http://raspbian.org))
 
 ## Installation
 1.	Install Homebridge using `npm install -g homebridge`
-2.	Install this plugin `npm install -g homebridge-gpio`
+2.	Install this plugin `npm install -g homebridge-gpio-cmd`
 3.	Update your configuration file - see `sample-config.json` in this repo
-4.	Install my forked version of [gpo-admin](https://github.com/quick2wire/quick2wire-gpio-admin) _(abandoned project)_:
-
-
-```bash
-git clone git://github.com/jamesblanksby/quick2wire-gpio-admin.git
-cd quick2wire-gpio-admin
-make
-sudo make install
-sudo adduser $USER gpio
-```
 
 ## Configuration
 Example `config.json`
@@ -28,8 +25,8 @@ Example `config.json`
 {
   "accessories": [
     {
-      "accessory": "GPIO",
-        "name": "GPIO4",
+        "accessory": "GPIO",
+        "name": "Lamp",
         "pin": 7,
         "duration": 4000
     }
@@ -38,141 +35,56 @@ Example `config.json`
 ```
 
 ## Pin Configuration
-An extract from: [pi-gpio](https://github.com/rakeshpai/pi-gpio):
+You need to configure the relevant GPIO pins using the [gpio utility](https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+) included with wiringPi.
 
-> This couldn't have been more confusing. Raspberry Pi's physical pins are not laid out in any particular logical order. Most of them are given the names of the pins of the Broadcom chip it uses (BCM2835). There isn't even a logical relationship between the physical layout of the Raspberry Pi pin header and the Broadcom chip's pinout. The OS recognizes the names of the Broadcom chip and has nothing to do with the physical pin layout on the Pi. To add to the fun, the specs for the Broadcom chip are nearly impossible to get!
+```
+$ gpio readall
+ +-----+-----+---------+------+---+-Pi Zero--+---+------+---------+-----+-----+
+ | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
+ +-----+-----+---------+------+---+----++----+---+------+---------+-----+-----+
+ |     |     |    3.3v |      |   |  1 || 2  |   |      | 5v      |     |     |
+ |   2 |   8 |   SDA.1 | ALT0 | 1 |  3 || 4  |   |      | 5V      |     |     |
+ |   3 |   9 |   SCL.1 | ALT0 | 1 |  5 || 6  |   |      | 0v      |     |     |
+ |   4 |   7 | GPIO. 7 |   IN | 1 |  7 || 8  | 1 | ALT0 | TxD     | 15  | 14  |
+ |     |     |      0v |      |   |  9 || 10 | 1 | ALT0 | RxD     | 16  | 15  |
+ |  17 |   0 | GPIO. 0 |   IN | 0 | 11 || 12 | 0 | IN   | GPIO. 1 | 1   | 18  |
+ |  27 |   2 | GPIO. 2 |   IN | 0 | 13 || 14 |   |      | 0v      |     |     |
+ |  22 |   3 | GPIO. 3 |   IN | 0 | 15 || 16 | 0 | OUT  | GPIO. 4 | 4   | 23  |
+ |     |     |    3.3v |      |   | 17 || 18 | 0 | IN   | GPIO. 5 | 5   | 24  |
+ |  10 |  12 |    MOSI |   IN | 0 | 19 || 20 |   |      | 0v      |     |     |
+ |   9 |  13 |    MISO |   IN | 0 | 21 || 22 | 0 | IN   | GPIO. 6 | 6   | 25  |
+ |  11 |  14 |    SCLK |   IN | 0 | 23 || 24 | 1 | IN   | CE0     | 10  | 8   |
+ |     |     |      0v |      |   | 25 || 26 | 1 | IN   | CE1     | 11  | 7   |
+ |   0 |  30 |   SDA.0 |   IN | 1 | 27 || 28 | 1 | IN   | SCL.0   | 31  | 1   |
+ |   5 |  21 | GPIO.21 |   IN | 1 | 29 || 30 |   |      | 0v      |     |     |
+ |   6 |  22 | GPIO.22 |   IN | 1 | 31 || 32 | 0 | IN   | GPIO.26 | 26  | 12  |
+ |  13 |  23 | GPIO.23 |   IN | 0 | 33 || 34 |   |      | 0v      |     |     |
+ |  19 |  24 | GPIO.24 |   IN | 0 | 35 || 36 | 0 | IN   | GPIO.27 | 27  | 16  |
+ |  26 |  25 | GPIO.25 |   IN | 0 | 37 || 38 | 0 | IN   | GPIO.28 | 28  | 20  |
+ |     |     |      0v |      |   | 39 || 40 | 0 | IN   | GPIO.29 | 29  | 21  |
+ +-----+-----+---------+------+---+----++----+---+------+---------+-----+-----+
+ | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
+ +-----+-----+---------+------+---+-Pi Zero--+---+------+---------+-----+-----+
+```
 
-<table>
-    <tr>
-        <td>P1 - 3.3v</td>
-        <td>1</td>
-        <td>2</td>
-        <td>5v</td>
-    </tr>
-    <tr>
-        <td>I2C SDA</td>
-        <td>3</td>
-        <td>4</td>
-        <td>--</td>
-    </tr>
-    <tr>
-        <td>I2C SCL</td>
-        <td>5</td>
-        <td>6</td>
-        <td>Ground</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>7</td>
-        <td>8</td>
-        <td>TX</td>
-    </tr>
-    <tr>
-        <td>--</td>
-        <td>9</td>
-        <td>10</td>
-        <td>RX</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>11</td>
-        <td>12</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>13</td>
-        <td>14</td>
-        <td>--</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>15</td>
-        <td>16</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>--</td>
-        <td>17</td>
-        <td>18</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>SPI MOSI</td>
-        <td>19</td>
-        <td>20</td>
-        <td>--</td>
-    </tr>
-    <tr>
-        <td>SPI MISO</td>
-        <td>21</td>
-        <td>22</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>SPI SCLK</td>
-        <td>23</td>
-        <td>24</td>
-        <td>SPI CE0</td>
-    </tr>
-    <tr>
-        <td>--</td>
-        <td>25</td>
-        <td>26</td>
-        <td>SPI CE1</td>
-    </tr>
-    <tr>
-        <td colspan="4">Model A+ and Model B+ additional pins</td>
-    </tr>
-    <tr>
-        <td>ID_SD</td>
-        <td>27</td>
-        <td>28</td>
-        <td>ID_SC</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>29</td>
-        <td>30</td>
-        <td>--</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>31</td>
-        <td>32</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>33</td>
-        <td>34</td>
-        <td>--</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>35</td>
-        <td>36</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>GPIO</td>
-        <td>37</td>
-        <td>38</td>
-        <td>GPIO</td>
-    </tr>
-    <tr>
-        <td>--</td>
-        <td>39</td>
-        <td>40</td>
-        <td>GPIO</td>
-    </tr>
-</table>
+The pin number specified in the config.json file is the **physical** pin number in this table
+(matching homebridge-gpio, but not homebridge-gpio-wpi which uses BCM pin numbers instead).
 
-> That gives you several GPIO pins to play with: pins 7, 11, 12, 13, 15, 16, 18 and 22 (with A+ and B+ giving 29, 31, 32, 33, 35, 37, 38 and 40). You should provide these physical pin numbers to this library, and not bother with what they are called internally. Easy-peasy.
+homebridge-gpio-cmd only requires configuring the mode as output (no export needed), for example,
+to configure the pin in the example config.json above, you could add to `/etc/rc.local`:
+
+```
+gpio -1 mode 7 out
+```
 
 ## Licence
 
 (The MIT License)
+
+Copyright (c) 2016 rxseger rseger@gmx.co.uk
+
+Copyright (c) 2016 Richard Grime richard.grime@gmail.com
 
 Copyright (c) 2016 James Blanksby james@blanks.by
 
