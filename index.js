@@ -1,5 +1,5 @@
-var gpio = require('pi-gpio');
 var Service, Characteristic;
+var child_process = require('child_process');
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -11,7 +11,7 @@ module.exports = function(homebridge) {
 function GPIOAccessory(log, config) {
     this.log = log;
     this.name = config['name'];
-    this.pin = config['pin'];
+    this.pin = +config['pin'];
     this.duration = config['duration'];
     this.service = new Service.Switch(this.name);
 
@@ -28,14 +28,20 @@ GPIOAccessory.prototype.getServices = function() {
     return [this.service];
 }
 
+function run_cmd(cmd, args, callBack ) {
+    var spawn = child_process.spawn;
+    var child = spawn(cmd, args);
+    var resp = "";
+
+    child.stdout.on('data', function (buffer) { resp += buffer.toString() });
+    child.stdout.on('end', function() { callBack (resp) });
+}
+
 GPIOAccessory.prototype.getOn = function(callback) {
-    gpio.read(this.pin, function(err, value) {
-        if (err) {
-        	callback(err);
-        } else {
-	        var on = value;
-    	    callback(null, on);
-    	}
+    run_cmd('gpio', ['-1', 'read', ''+this.pin], function(data) {
+        //console.log('data=',data);
+        var on = parseInt(data);
+        callback(null, on?1:0);
     });
 }
 
@@ -56,12 +62,7 @@ GPIOAccessory.prototype.pinAction = function(action) {
         this.log('Turning ' + (action == 0 ? 'on' : 'off') + ' pin #' + this.pin);
 
         var self = this;
-        gpio.open(self.pin, 'output', function() {
-        gpio.write(self.pin, action, function() {
-		gpio.close(self.pin);
-		return true;
-        });
-    });
+	child_process.exec('gpio -1 write ' + this.pin + ' ' + (action?0:1));
 }
 
 GPIOAccessory.prototype.pinTimer = function() {
