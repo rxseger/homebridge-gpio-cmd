@@ -14,6 +14,7 @@ function GPIOAccessory(log, config) {
     this.pin = +config['pin'];
     this.duration = config['duration'];
     this.service = new Service.Switch(this.name);
+    this.invert = !!config.invert;
 
     if (!this.pin) throw new Error('You must provide a config value for pin.');
 
@@ -38,9 +39,11 @@ function run_cmd(cmd, args, callBack ) {
 }
 
 GPIOAccessory.prototype.getOn = function(callback) {
+    var invert = this.invert;
     run_cmd('gpio', ['-1', 'read', ''+this.pin], function(data) {
         //console.log('data=',data);
         var on = parseInt(data);
+        if (invert) on = !on;
         callback(null, on?1:0);
     });
 }
@@ -62,6 +65,7 @@ GPIOAccessory.prototype.pinAction = function(action) {
         this.log('Turning ' + (action == 0 ? 'on' : 'off') + ' pin #' + this.pin);
 
         var self = this;
+        if (this.invert) action = !action;
 	child_process.exec('gpio -1 write ' + this.pin + ' ' + (action?0:1));
 }
 

@@ -28,7 +28,8 @@ Example `config.json`
         "accessory": "GPIO",
         "name": "Lamp",
         "pin": 7,
-        "duration": 4000
+        "duration": 4000,
+        "invert": false
     }
   ]
 }
